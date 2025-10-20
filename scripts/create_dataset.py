@@ -174,7 +174,8 @@ def main():
 
         for j, action in enumerate(actions):
 
-            obs, reward, done, info = env.step(action)
+            obs, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
 
             if j < num_actions - 1:
                 # ensure that the actions deterministically lead to the same recorded states

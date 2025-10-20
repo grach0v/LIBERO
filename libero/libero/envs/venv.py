@@ -1,6 +1,6 @@
 import cloudpickle
 import ctypes
-import gym
+import gymnasium as gym
 import numpy as np
 import numpy as np
 import warnings
@@ -13,8 +13,8 @@ from multiprocessing.context import Process
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 
-gym_old_venv_step_type = Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]
-gym_new_venv_step_type = Tuple[
+# Type for Gymnasium step API: (obs, reward, terminated, truncated, info)
+gym_venv_step_type = Tuple[
     np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray
 ]
 warnings.simplefilter("once", DeprecationWarning)
@@ -74,8 +74,7 @@ class EnvWorker(ABC):
         self._env_fn = env_fn
         self.is_closed = False
         self.result: Union[
-            gym_old_venv_step_type,
-            gym_new_venv_step_type,
+            gym_venv_step_type,
             Tuple[np.ndarray, dict],
             np.ndarray,
         ]
@@ -112,17 +111,15 @@ class EnvWorker(ABC):
     def recv(
         self,
     ) -> Union[
-        gym_old_venv_step_type,
-        gym_new_venv_step_type,
+        gym_venv_step_type,
         Tuple[np.ndarray, dict],
         np.ndarray,
     ]:  # noqa:E125
         """Receive result from low-level worker.
 
         If the last "send" function sends a NULL action, it only returns a
-        single observation; otherwise it returns a tuple of (obs, rew, done,
-        info) or (obs, rew, terminated, truncated, info), based on whether
-        the environment is using the old step API or the new one.
+        single observation; otherwise it returns a tuple of (obs, rew, 
+        terminated, truncated, info) for the Gymnasium step API.
         """
         if hasattr(self, "get_result"):
             deprecation(
@@ -139,7 +136,7 @@ class EnvWorker(ABC):
 
     def step(
         self, action: np.ndarray
-    ) -> Union[gym_old_venv_step_type, gym_new_venv_step_type]:
+    ) -> gym_venv_step_type:
         """Perform one timestep of the environment's dynamic.
 
         "send" and "recv" are coupled in sync simulation, so users only call
@@ -429,8 +426,7 @@ class SubprocEnvWorker(EnvWorker):
     def recv(
         self,
     ) -> Union[
-        gym_old_venv_step_type,
-        gym_new_venv_step_type,
+        gym_venv_step_type,
         Tuple[np.ndarray, dict],
         np.ndarray,
     ]:  # noqa:E125
@@ -738,7 +734,7 @@ class BaseVectorEnv(object):
         self,
         action: np.ndarray,
         id: Optional[Union[int, List[int], np.ndarray]] = None,
-    ) -> Union[gym_old_venv_step_type, gym_new_venv_step_type]:
+    ) -> gym_venv_step_type:
         """Run one timestep of some environments' dynamics.
 
         If id is None, run one timestep of all the environments’ dynamics;

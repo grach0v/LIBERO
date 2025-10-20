@@ -20,7 +20,7 @@ def render_task(task, bddl_file, init_states, demo_file):
     env.reset()
     obs = env.set_init_state(init_states[0])
     for _ in range(5):
-        obs, _, _, _ = env.step([0.0] * 7)
+        obs, _, _, _, _ = env.step([0.0] * 7)
     images = [obs["agentview_image"]]
 
     with h5py.File(demo_file, "r") as f:
@@ -64,7 +64,7 @@ def main():
     env.reset()
     obs = env.set_init_state(init_states[0])
     for _ in range(5):
-        obs, _, _, _ = env.step([0.0] * 7)
+        obs, _, _, _, _ = env.step([0.0] * 7)
     images = [obs["agentview_image"]]
 
     with h5py.File(demo_file, "r") as f:
