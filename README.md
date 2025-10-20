@@ -119,15 +119,14 @@ env_args = {
     "camera_widths": 128
 }
 env = OffScreenRenderEnv(**env_args)
-env.seed(0)
-env.reset()
+env.reset(seed=0)
 init_states = task_suite.get_task_init_states(task_id) # for benchmarking purpose, we fix the a set of initial states
 init_state_id = 0
 env.set_init_state(init_states[init_state_id])
 
 dummy_action = [0.] * 7
 for step in range(10):
-    obs, reward, done, info = env.step(dummy_action)
+    obs, reward, terminated, truncated, info = env.step(dummy_action)
 env.close()
 ```
 Currently, we only support sparse reward function (i.e., the agent receives `+1` when the task is finished). As sparse-reward RL is extremely hard to learn, currently we mainly focus on lifelong imitation learning.

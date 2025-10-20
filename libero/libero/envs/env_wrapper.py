@@ -87,7 +87,9 @@ class ControlEnv:
     def step(self, action):
         return self.env.step(action)
 
-    def reset(self):
+    def reset(self, seed=None, **kwargs):
+        if seed is not None:
+            self.seed(seed)
         success = False
         while not success:
             try:
@@ -186,7 +188,9 @@ class SegmentationRenderEnv(OffScreenRenderEnv):
     def step(self, action):
         return self.env.step(action)
 
-    def reset(self):
+    def reset(self, seed=None, **kwargs):
+        if seed is not None:
+            self.seed(seed)
         obs = self.env.reset()
         self.segmentation_id_mapping = {}
 

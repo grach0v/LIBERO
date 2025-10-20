@@ -107,7 +107,7 @@ def evaluate_one_task_success(
         init_states = torch.load(init_states_path)
         num_success = 0
         for i in range(eval_loop_num):
-            env.reset()
+            env.reset()  # VectorEnv reset doesn't require unpacking
             indices = np.arange(i * env_num, (i + 1) * env_num) % init_states.shape[0]
             init_states_ = init_states[indices]
 
@@ -119,7 +119,7 @@ def evaluate_one_task_success(
             # dummy actions [env_num, 7] all zeros for initial physics simulation
             dummy = np.zeros((env_num, 7))
             for _ in range(5):
-                obs, _, _, _ = env.step(dummy)
+                obs, _, _, _, _ = env.step(dummy)
 
             if task_str != "":
                 sim_state = env.get_sim_state()
@@ -133,7 +133,8 @@ def evaluate_one_task_success(
                 data = raw_obs_to_tensor_obs(obs, task_emb, cfg)
                 actions = algo.policy.get_action(data)
 
-                obs, reward, done, info = env.step(actions)
+                obs, reward, terminated, truncated, info = env.step(actions)
+                done = terminated | truncated
 
                 # record the sim states for replay purpose
                 if task_str != "":

@@ -244,8 +244,7 @@ def main():
         env = SubprocVectorEnv(
             [lambda: OffScreenRenderEnv(**env_args) for _ in range(env_num)]
         )
-        env.reset()
-        env.seed(cfg.seed)
+        env.reset(seed=cfg.seed)  # Seed via reset in Gymnasium
         algo.reset()
 
         init_states_path = os.path.join(
@@ -262,7 +261,7 @@ def main():
 
         num_success = 0
         for _ in range(5):  # simulate the physics without any actions
-            env.step(np.zeros((env_num, 7)))
+            _, _, _, _, _ = env.step(np.zeros((env_num, 7)))
 
         with torch.no_grad():
             while steps < cfg.eval.max_steps:
@@ -270,7 +269,8 @@ def main():
 
                 data = raw_obs_to_tensor_obs(obs, task_emb, cfg)
                 actions = algo.policy.get_action(data)
-                obs, reward, done, info = env.step(actions)
+                obs, reward, terminated, truncated, info = env.step(actions)
+                done = terminated | truncated
                 video_writer.append_vector_obs(
                     obs, dones, camera_name="agentview_image"
                 )
